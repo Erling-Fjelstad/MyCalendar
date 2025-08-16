@@ -1,3 +1,5 @@
+import sqlite3
+
 def main():
     print("Hello from mycalender!")
 
