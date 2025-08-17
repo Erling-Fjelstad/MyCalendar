@@ -3,7 +3,7 @@ from task import Task
 from datetime import date
 
 def get_connection():
-    conn = sqlite3.connect("mycalender.db")
+    conn = sqlite3.connect("mycalendar.db")
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -56,6 +56,6 @@ def get_tasks_as_objects() -> list[Task]:
                 due_date=due_date,
                 status=row["status"]
             ))
-            
+
         return tasks
         
