@@ -212,10 +212,14 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "streamlit" },
+    { name = "streamlit-calendar" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "streamlit", specifier = ">=1.48.1" }]
+requires-dist = [
+    { name = "streamlit", specifier = ">=1.48.1" },
+    { name = "streamlit-calendar", specifier = ">=1.4.0" },
+]
 
 [[package]]
 name = "narwhals"
@@ -578,6 +582,18 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/e2/1b/eb83cf2a11961338d23deed0530e3ccc1db7b4ab497b0b4d94886205d0c0/streamlit-1.48.1.tar.gz", hash = "sha256:c6e2a9f24471746bbeaa54a288f5fdfc6e2bcf3ba9a9753fde5d49ed424391f1", size = 9524808, upload-time = "2025-08-13T12:03:55.727Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/e0/21/ebf8942e939b96e4040d2285c9b71d42f317618a3b656aa67f95f505b241/streamlit-1.48.1-py3-none-any.whl", hash = "sha256:1da4081c8cc23d574c4ab66f0bb59d6a6000ecf2f06b35242d56cfe16f2bd612", size = 9928586, upload-time = "2025-08-13T12:03:52.816Z" },
+]
+
+[[package]]
+name = "streamlit-calendar"
+version = "1.4.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "streamlit" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/ab/da/d394612a18e8ee3410c088035a7b804e56c0318e0e9169a150158723910d/streamlit_calendar-1.4.0.tar.gz", hash = "sha256:47bd4fe839fdcbc7f334cb3aec0b83556558357562bb58c5a9fdfe11cd4e7b80", size = 1264452, upload-time = "2025-07-24T13:14:50.032Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/09/1b/76be5aa2aeacc34bf0022680e3e694bcdd6c812b93b122d617513ebdc9bc/streamlit_calendar-1.4.0-py3-none-any.whl", hash = "sha256:bba0fbd47c0910b8eb15fc3689d3f66a097bf26818da36a3c1737e00fe995966", size = 1276322, upload-time = "2025-07-24T13:14:48.629Z" },
 ]
 
 [[package]]
