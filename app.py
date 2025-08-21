@@ -1,5 +1,6 @@
 import streamlit as st
 from streamlit_calendar import calendar
+import db
 
 calendar_options = {
     "editable": True,
@@ -14,13 +15,24 @@ calendar_options = {
     "initialView": "timeGridWeek",
 }
 
-calendar_events = [
-    {
-        "title": "Event 1",
-        "start": "2025-08-21T08:30:00",
-        "end": "2025-08-21T10:30:00",
-    },
-]
+db.init_db()
+tasks_list = db.get_tasks_as_objects()
+
+calendar_events = []
+
+for task in tasks_list:
+    calendar_events.append(
+         {
+            "title": task.title,
+            "start": task.start,
+            "end": task.end,
+            "extendedProps": {
+                "description": task.description,
+                "status": task.status
+            },
+            "display": "auto",
+        },
+    )
 
 custom_css="""
     .fc-event-past {
@@ -42,6 +54,9 @@ cal_state = calendar(
     options=calendar_options,
     custom_css=custom_css,
     key='calendar', # Assign a widget key to prevent state loss
-    )
+)
 
-
+if cal_state and "eventClick" in cal_state:
+    props = cal_state["eventClick"]["event"]["extendedProps"]
+    if props.get("description"): st.write(f"Description: {props['description']}")
+    if props.get("status"): st.write(f"Status: {props['status']}")

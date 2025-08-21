@@ -15,10 +15,11 @@ def init_db():
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 title TEXT NOT NULL, 
                 description TEXT NOT NULL, 
-                due_date TEXT, 
+                start TEXT NOT NULL, 
+                end TEXT NOT NULL,
                 status TEXT NOT NULL DEFAULT 'todo',
                 created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                UNIQUE(title, due_date) 
+                UNIQUE(title, start, end) 
             );
         """)
 
@@ -26,12 +27,13 @@ def insert_task(t: Task):
     with get_connection() as conn:
         cur = conn.cursor()
         cur.execute("""
-            INSERT OR IGNORE INTO tasks (title, description, due_date, status)
-            VALUES (?, ?, ?, ?)
+            INSERT OR IGNORE INTO tasks (title, description, start, end, status)
+            VALUES (?, ?, ?, ?, ?)
         """, (
             t.title,
             t.description,
-            t.due_date.isoformat() if isinstance(t.due_date, date) else t.due_date,
+            t.start.isoformat() if isinstance(t.start, date) else t.start,
+            t.end.isoformat() if isinstance(t.end, date) else t.end,
             t.status
         ))
 
@@ -48,12 +50,11 @@ def get_tasks_as_objects() -> list[Task]:
         tasks = []
 
         for row in rows:
-            due_str = row["due_date"]
-            due_date = date.fromisoformat(due_str) if due_str else None
             tasks.append(Task(
                 title=row["title"],
                 description=row["description"],
-                due_date=due_date,
+                start=row["start"],
+                end=row["end"],
                 status=row["status"]
             ))
 
