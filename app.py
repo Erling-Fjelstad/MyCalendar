@@ -13,6 +13,7 @@ calendar_options = {
     "slotMinTime": "06:00:00",
     "slotMaxTime": "18:00:00",
     "initialView": "timeGridWeek",
+    "firstDay": 1,
 }
 
 db.init_db()
