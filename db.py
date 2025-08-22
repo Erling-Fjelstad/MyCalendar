@@ -1,6 +1,7 @@
 import sqlite3
 from task import Task
-from datetime import date
+from lecture import Lecture
+from datetime import datetime
 
 def get_connection():
     conn = sqlite3.connect("mycalendar.db")
@@ -10,6 +11,7 @@ def get_connection():
 def init_db():
     with get_connection() as conn:
         cur = conn.cursor()
+
         cur.execute("""
             CREATE TABLE IF NOT EXISTS tasks (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -23,6 +25,18 @@ def init_db():
             );
         """)
 
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS lectures (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                course TEXT NOT NULL,
+                description TEXT NOT NULL,
+                start TEXT NOT NULL,
+                end TEXT NOT NULL,
+                created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(course, start, end)
+            );
+        """)
+
 def insert_task(t: Task):
     with get_connection() as conn:
         cur = conn.cursor()
@@ -32,9 +46,22 @@ def insert_task(t: Task):
         """, (
             t.title,
             t.description,
-            t.start.isoformat() if isinstance(t.start, date) else t.start,
-            t.end.isoformat() if isinstance(t.end, date) else t.end,
+            t.start.isoformat() if isinstance(t.start, datetime) else t.start,
+            t.end.isoformat() if isinstance(t.end, datetime) else t.end,
             t.status
+        ))
+
+def insert_lecture(l: Lecture):
+    with get_connection() as conn:
+        cur = conn.cursor()
+        cur.execute("""
+            INSERT OR IGNORE INTO lectures (course, description, start, end)
+            VALUES (?, ?, ?, ?)
+        """, (
+            l.course,
+            l.description,
+            l.start.isoformat() if isinstance(l.start, datetime) else l.start,
+            l.end.isoformat() if isinstance(l.end, datetime) else l.end
         ))
 
 def get_tasks() -> list[dict]:
@@ -42,6 +69,12 @@ def get_tasks() -> list[dict]:
         cur = conn.cursor()
         rows = cur.execute("SELECT * FROM tasks").fetchall()
         return [dict(r) for r in rows]
+    
+def get_lectures() -> list[dict]:
+    with get_connection() as conn:
+        cur = conn.cursor()
+        rows = cur.execute("SELECT * FROM lectures").fetchall()
+        return [dict(r) for r in rows]    
     
 def get_tasks_as_objects() -> list[Task]:
     with get_connection() as conn:
@@ -53,10 +86,26 @@ def get_tasks_as_objects() -> list[Task]:
             tasks.append(Task(
                 title=row["title"],
                 description=row["description"],
-                start=row["start"],
-                end=row["end"],
+                start=datetime.fromisoformat(row["start"]),
+                end=datetime.fromisoformat(row["end"]),
                 status=row["status"]
             ))
 
         return tasks
         
+
+def get_lectures_as_objects() -> list[Lecture]:
+    with get_connection() as conn:
+        cur = conn.cursor()
+        rows = cur.execute("SELECT * FROM lectures").fetchall()
+        lectures = []
+
+        for row in rows:
+            lectures.append(Lecture(
+                course=row["course"],
+                description=row["description"],
+                start=datetime.fromisoformat(row["start"]),
+                end=datetime.fromisoformat(row["end"])
+            ))
+        
+        return lectures

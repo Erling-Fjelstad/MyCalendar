@@ -18,22 +18,46 @@ calendar_options = {
 
 db.init_db()
 tasks_list = db.get_tasks_as_objects()
+lectures_list = db.get_lectures_as_objects()
 
 calendar_events = []
 
+TASK_BG = "#B8E0D2"     
+TASK_BORDER = "#6BBFA5"
+TASK_TEXT = "#103D33"
+
+LEC_BG = "#C7D3FF"      
+LEC_BORDER = "#7E9BFF"
+LEC_TEXT = "#0F1B3D"
+
 for task in tasks_list:
-    calendar_events.append(
-         {
-            "title": task.title,
-            "start": task.start,
-            "end": task.end,
-            "extendedProps": {
-                "description": task.description,
-                "status": task.status
-            },
-            "display": "auto",
+    calendar_events.append({
+        "title": task.title,
+        "start": task.start.isoformat(),
+        "end": task.end.isoformat(),
+        "extendedProps": {
+            "description": task.description,
+            "status": task.status
         },
-    )
+        "display": "auto",
+        "backgroundColor": TASK_BG,
+        "borderColor": TASK_BORDER,
+        "textColor": TASK_TEXT,
+    })
+
+for lecture in lectures_list:
+    calendar_events.append({
+        "title": lecture.course,
+        "start": lecture.start.isoformat(),
+        "end": lecture.end.isoformat(),
+        "extendedProps": {
+            "description": lecture.description,
+        },
+        "display": "auto",
+        "backgroundColor": LEC_BG,
+        "borderColor": LEC_BORDER,
+        "textColor": LEC_TEXT,
+    })
 
 custom_css="""
     .fc-event-past {
@@ -50,14 +74,24 @@ custom_css="""
     }
 """
 
+st.title("My Calendar")
+
 cal_state = calendar(
     events=calendar_events,
     options=calendar_options,
     custom_css=custom_css,
-    key='calendar', # Assign a widget key to prevent state loss
+    key='calendar', 
 )
 
 if cal_state and "eventClick" in cal_state:
-    props = cal_state["eventClick"]["event"]["extendedProps"]
-    if props.get("description"): st.write(f"Description: {props['description']}")
-    if props.get("status"): st.write(f"Status: {props['status']}")
+    ev = cal_state["eventClick"]["event"]
+    title = ev.get("title")
+    props = ev.get("extendedProps", {}) or {}
+
+    with st.container(border=True):  
+        st.markdown(f"**{title}**")
+        if props.get("description"):
+            st.write(props["description"])
+        if props.get("status"):
+            st.write(f"Status: {props['status']}")
+

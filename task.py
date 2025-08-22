@@ -1,10 +1,12 @@
+from datetime import datetime
+
 class Task:
     def __init__(
             self,
             title: str,
             description: str,
-            start: str,
-            end: str,
+            start: datetime,
+            end: datetime,
             status: str = "todo"
     ):
         self.title = title
