@@ -8,7 +8,7 @@ class Task:
             all_day: bool,
             start: datetime,
             end: datetime,
-            status: str = "todo"
+            status: str
     ):
         self.title = title
         self.description = description

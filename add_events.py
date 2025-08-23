@@ -1,0 +1,119 @@
+import streamlit as st
+import datetime
+import time
+from task import Task
+from lecture import Lecture
+import db
+
+STATUS_MAP = {"Todo": "todo", "In progress": "in-progress", "Done": "done"}
+
+def add_object(
+    event: str | None,
+    title: str,
+    description: str,
+    date: datetime.date,
+    all_day: bool,
+    start: datetime.time | None = None,
+    end: datetime.time | None = None,
+    status: str | None = "todo",
+):
+    if not event or not title or not description or not date:
+        st.error("You have not filled out the required fields")
+        return
+
+    if all_day:
+        start_dt = datetime.datetime.combine(date, datetime.time(0, 0))
+        end_dt   = datetime.datetime.combine(date, datetime.time(23, 59, 59))
+    else:
+        if not start or not end:
+            st.error("Please select start and end time")
+            return
+        start_dt = datetime.datetime.combine(date, start)
+        end_dt   = datetime.datetime.combine(date, end)
+        if end_dt <= start_dt:
+            st.error("End time must be after start time")
+            return
+
+    if event == "Task":
+        status_norm = STATUS_MAP.get(status or "", "todo")
+        task = Task(
+            title=title.strip(),
+            description=description.strip(),
+            all_day=all_day,
+            start=start_dt,
+            end=end_dt,
+            status=status_norm,
+        )
+        db.insert_task(task)
+        st.success("Task added")
+        time.sleep(1)
+        st.rerun()
+
+    elif event == "Lecture":
+        lecture = Lecture(         
+            course=title.strip(),
+            description=description.strip(),
+            all_day=all_day,
+            start=start_dt,
+            end=end_dt,
+        )
+        db.insert_lecture(lecture)
+        st.success("Lecture added")
+        time.sleep(1)
+        st.rerun()
+
+
+    else:
+        st.error("Unknown event type")
+
+def add_events():
+    event = st.selectbox(
+        label="Event:",
+        options=["Task", "Lecture"],
+        index=None,
+        placeholder="Select event type",
+    )
+
+    event_title = st.text_input("Title:", placeholder="Title for this event")
+
+    event_description = st.text_input("Description:", placeholder="Describe this event")
+
+    event_date = st.date_input(
+        "Select the date for the event",
+        value=datetime.date.today(),
+        min_value=datetime.date.today(),
+    )
+
+    event_all_day = st.toggle("All day?", value=False)
+
+    if event_all_day == False:
+        event_start = st.time_input(
+            label="Start time:",
+            value=datetime.time(9, 0),
+        )
+    
+        event_end = st.time_input(
+            label="End time:",
+            value=datetime.time(12, 0),
+        )
+
+    event_status = None
+    if event == "Task":
+        event_status = st.selectbox(
+            "Status",
+            options=["Todo", "In progress", "Done"],
+            index=None,
+            placeholder="Select the status",
+        )
+
+    if st.button("Add", type="primary"):
+        add_object(
+            event=event,
+            title=event_title,
+            description=event_description,
+            date=event_date,
+            all_day=event_all_day,
+            start=None if event_all_day else event_start,
+            end=None if event_all_day else event_end,
+            status=event_status,
+        )

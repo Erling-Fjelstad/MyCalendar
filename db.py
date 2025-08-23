@@ -20,7 +20,7 @@ def init_db():
                 all_day INTEGER NOT NULL, 
                 start TEXT NOT NULL, 
                 end TEXT NOT NULL,
-                status TEXT NOT NULL DEFAULT 'todo',
+                status TEXT NOT NULL,
                 created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 UNIQUE(title, start, end) 
             );
