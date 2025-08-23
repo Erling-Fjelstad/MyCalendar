@@ -16,7 +16,8 @@ def init_db():
             CREATE TABLE IF NOT EXISTS tasks (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 title TEXT NOT NULL, 
-                description TEXT NOT NULL, 
+                description TEXT NOT NULL,
+                all_day INTEGER NOT NULL, 
                 start TEXT NOT NULL, 
                 end TEXT NOT NULL,
                 status TEXT NOT NULL DEFAULT 'todo',
@@ -30,6 +31,7 @@ def init_db():
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 course TEXT NOT NULL,
                 description TEXT NOT NULL,
+                all_day INTEGER NOT NULL, 
                 start TEXT NOT NULL,
                 end TEXT NOT NULL,
                 created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -41,11 +43,12 @@ def insert_task(t: Task):
     with get_connection() as conn:
         cur = conn.cursor()
         cur.execute("""
-            INSERT OR IGNORE INTO tasks (title, description, start, end, status)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT OR IGNORE INTO tasks (title, description, all_day, start, end, status)
+            VALUES (?, ?, ?, ?, ?, ?)
         """, (
             t.title,
             t.description,
+            t.all_day,
             t.start.isoformat() if isinstance(t.start, datetime) else t.start,
             t.end.isoformat() if isinstance(t.end, datetime) else t.end,
             t.status
@@ -55,11 +58,12 @@ def insert_lecture(l: Lecture):
     with get_connection() as conn:
         cur = conn.cursor()
         cur.execute("""
-            INSERT OR IGNORE INTO lectures (course, description, start, end)
-            VALUES (?, ?, ?, ?)
+            INSERT OR IGNORE INTO lectures (course, description, all_day, start, end)
+            VALUES (?, ?, ?, ?, ?)
         """, (
             l.course,
             l.description,
+            l.all_day,
             l.start.isoformat() if isinstance(l.start, datetime) else l.start,
             l.end.isoformat() if isinstance(l.end, datetime) else l.end
         ))
@@ -86,6 +90,7 @@ def get_tasks_as_objects() -> list[Task]:
             tasks.append(Task(
                 title=row["title"],
                 description=row["description"],
+                all_day=bool(row["all_day"]),
                 start=datetime.fromisoformat(row["start"]),
                 end=datetime.fromisoformat(row["end"]),
                 status=row["status"]
@@ -104,6 +109,7 @@ def get_lectures_as_objects() -> list[Lecture]:
             lectures.append(Lecture(
                 course=row["course"],
                 description=row["description"],
+                all_day=bool(row["all_day"]),
                 start=datetime.fromisoformat(row["start"]),
                 end=datetime.fromisoformat(row["end"])
             ))

@@ -5,12 +5,14 @@ class Task:
             self,
             title: str,
             description: str,
+            all_day: bool,
             start: datetime,
             end: datetime,
             status: str = "todo"
     ):
         self.title = title
         self.description = description
+        self.all_day = all_day
         self.start = start
         self.end = end
         self.status = status

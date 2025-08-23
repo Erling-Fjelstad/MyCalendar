@@ -5,11 +5,13 @@ class Lecture:
         self,
         course: str,
         description: str,
+        all_day: bool,
         start: datetime,
         end: datetime
     ):
         self.course = course
         self.description = description
+        self.all_day = all_day
         self.start = start
         self.end = end
     
