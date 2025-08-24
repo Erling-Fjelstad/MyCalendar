@@ -1,9 +1,11 @@
-import streamlit as st
 import datetime
 import time
+
+import streamlit as st
+
+import db
 from task import Task
 from lecture import Lecture
-import db
 
 STATUS_MAP = {"Todo": "todo", "In progress": "in-progress", "Done": "done"}
 
@@ -23,13 +25,15 @@ def add_object(
 
     if all_day:
         start_dt = datetime.datetime.combine(date, datetime.time(0, 0))
-        end_dt   = datetime.datetime.combine(date, datetime.time(23, 59, 59))
+        end_dt = datetime.datetime.combine(date, datetime.time(23, 59, 59))
     else:
         if not start or not end:
             st.error("Please select start and end time")
             return
+        
         start_dt = datetime.datetime.combine(date, start)
-        end_dt   = datetime.datetime.combine(date, end)
+        end_dt = datetime.datetime.combine(date, end)
+
         if end_dt <= start_dt:
             st.error("End time must be after start time")
             return
@@ -62,7 +66,6 @@ def add_object(
         time.sleep(1)
         st.rerun()
 
-
     else:
         st.error("Unknown event type")
 
@@ -86,7 +89,7 @@ def add_events():
 
     event_all_day = st.toggle("All day?", value=False)
 
-    if event_all_day == False:
+    if not event_all_day:
         event_start = st.time_input(
             label="Start time:",
             value=datetime.time(9, 0),
@@ -106,7 +109,7 @@ def add_events():
             placeholder="Select the status",
         )
 
-    if st.button("Add", type="primary"):
+    if st.button(label="Add", type="primary"):
         add_object(
             event=event,
             title=event_title,

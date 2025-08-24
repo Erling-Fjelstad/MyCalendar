@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Any
 
 class Lecture:
     def __init__(
@@ -16,13 +17,13 @@ class Lecture:
         self.end = end
     
     def __repr__(self) -> str:
-        return f"Course: {self.course!r} from {self.start!r} to {self.end!r}"
+        return f"Lectur(course={self.course!r}, start={self.start!r}, end={self.end!r})"
     
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Any) -> bool:
         if not isinstance(other, Lecture):
             return NotImplemented
         return (
-            self.course == other.course and
-            self.start == other.start and
-            self.end == other.end
+            self.course == other.course 
+            and self.start == other.start 
+            and self.end == other.end
         )

@@ -1,9 +1,10 @@
 import sqlite3
-from task import Task
-from lecture import Lecture
 from datetime import datetime
 
-def get_connection():
+from task import Task
+from lecture import Lecture
+
+def get_connection() -> sqlite3.Connection:
     conn = sqlite3.connect("mycalendar.db")
     conn.row_factory = sqlite3.Row
     return conn
@@ -115,3 +116,19 @@ def get_lectures_as_objects() -> list[Lecture]:
             ))
         
         return lectures
+
+def delete_task(task_id: int):
+    with get_connection() as conn:
+        cur = conn.cursor()
+        cur.execute(
+            "DELETE FROM tasks WHERE id = ?", 
+            (task_id,)
+        )
+
+def delete_lecture(lecture_id: int):
+    with get_connection() as conn:
+        cur = conn.cursor()
+        cur.execute(
+            "DELETE FROM lectures WHERE id = ?",
+            (lecture_id,)  
+        )
