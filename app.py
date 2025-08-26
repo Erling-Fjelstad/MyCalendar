@@ -7,7 +7,11 @@ st.title("My Calendar")
 
 my_calendar()
 
-add_event = st.toggle(label="Add event?", value=False)
+add_event = st.toggle(
+    label="Add event?",
+    value=False,
+    key="add_event"
+)
 
 if add_event:
     add_events()

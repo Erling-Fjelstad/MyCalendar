@@ -17,7 +17,7 @@ class Lecture:
         self.end = end
     
     def __repr__(self) -> str:
-        return f"Lectur(course={self.course!r}, start={self.start!r}, end={self.end!r})"
+        return f"Lecture(course={self.course!r}, start={self.start!r}, end={self.end!r})"
     
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, Lecture):

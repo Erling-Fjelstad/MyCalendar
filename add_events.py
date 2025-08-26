@@ -7,7 +7,6 @@ import db
 from task import Task
 from lecture import Lecture
 
-STATUS_MAP = {"Todo": "todo", "In progress": "in-progress", "Done": "done"}
 
 def add_object(
     event: str | None,
@@ -19,16 +18,16 @@ def add_object(
     repeat_weeks: int = 1,
     start: datetime.time | None = None,
     end: datetime.time | None = None,
-    status: str | None = "todo",
+    status: str = "Todo"
 ):
     if not event or not title or not description or not date:
         st.error("You have not filled out the required fields")
         return
 
     if all_day:
-        start_dt = datetime.datetime.combine(date, datetime.time(0, 0))
+        start_dt = datetime.datetime.combine(date, datetime.time(0, 0, 0))
         end_dt = datetime.datetime.combine(date, datetime.time(23, 59, 59))
-        
+
     else:
         if not start or not end:
             st.error("Please select start and end time")
@@ -42,8 +41,6 @@ def add_object(
             return
 
     if event == "Task":
-        status_norm = STATUS_MAP.get(status or "", "todo")
-
         if repeat_weekly:
             for i in range(int(repeat_weeks)):
                 delta = datetime.timedelta(weeks=i)
@@ -53,7 +50,7 @@ def add_object(
                     all_day=all_day,
                     start=start_dt + delta,
                     end=end_dt + delta,
-                    status=status_norm,
+                    status=status
                 )
                 db.insert_task(task)
 
@@ -68,7 +65,7 @@ def add_object(
                 all_day=all_day,
                 start=start_dt,
                 end=end_dt,
-                status=status_norm,
+                status=status
             )
             db.insert_task(task)
             st.success("Task added")
@@ -79,12 +76,12 @@ def add_object(
         if repeat_weekly:
             for i in range(int(repeat_weeks)):
                 delta = datetime.timedelta(weeks=i)
-                lecture = Lecture(         
+                lecture = Lecture(     
                     course=title.strip(),
                     description=description.strip(),
                     all_day=all_day,
                     start=start_dt + delta,
-                    end=end_dt + delta,
+                    end=end_dt + delta
                 )
                 db.insert_lecture(lecture)
 
@@ -93,12 +90,12 @@ def add_object(
             st.rerun()
 
         else:
-            lecture = Lecture(         
+            lecture = Lecture(     
                 course=title.strip(),
                 description=description.strip(),
                 all_day=all_day,
                 start=start_dt,
-                end=end_dt,
+                end=end_dt
             )
             db.insert_lecture(lecture)
             st.success("Lecture added")
@@ -113,42 +110,56 @@ def add_events():
         label="Event:",
         options=["Task", "Lecture"],
         index=None,
-        placeholder="Select event type",
+        placeholder="Select event type"
     )
 
-    event_title = st.text_input("Title:", placeholder="Title for this event")
+    event_title = st.text_input(
+        label="Title:", 
+        placeholder="Title for this event"
+    )
 
-    event_description = st.text_input("Description:", placeholder="Describe this event")
+    event_description = st.text_input(
+        label="Description:", 
+        placeholder="Describe this event"
+    )
 
     event_date = st.date_input(
-        "Select the date for the event",
+        label="Select the date for the event",
         value=datetime.date.today(),
-        min_value=datetime.date.today(),
+        min_value=datetime.date.today()
     )
 
-    event_all_day = st.toggle("All day?", value=False)
+    event_all_day = st.toggle(
+        label="All day?", 
+        value=False,
+        key="all_day_add"
+    )
 
     if not event_all_day:
         event_start = st.time_input(
             label="Start time:",
-            value=datetime.time(9, 0),
+            value=datetime.time(9, 0)
         )
     
         event_end = st.time_input(
             label="End time:",
-            value=datetime.time(12, 0),
+            value=datetime.time(12, 0)
         )
 
     event_status = None
     if event == "Task":
         event_status = st.selectbox(
-            "Status",
+            label="Status",
             options=["Todo", "In progress", "Done"],
-            index=None,
-            placeholder="Select the status",
+            index=0,
+            key="status_add"
         )
     
-    repeat_weekly = st.toggle("Repeat weekly?", value=False)
+    repeat_weekly = st.toggle(
+        label="Repeat weekly?", 
+        value=False,
+        key="repeat_weekly_add"
+    )
 
     repeat_weeks = 1
     if repeat_weekly:
@@ -156,10 +167,10 @@ def add_events():
             label="Number of weeks:",
             value=10,
             min_value=2,
-            step=1,
+            step=1
         )
 
-    if st.button(label="Add", type="primary"):
+    if st.button(label="ADD", type="primary"):
         add_object(
             event=event,
             title=event_title,
@@ -170,5 +181,5 @@ def add_events():
             end=None if event_all_day else event_end,
             status=event_status,
             repeat_weekly=repeat_weekly,
-            repeat_weeks=repeat_weeks,
+            repeat_weeks=repeat_weeks
         )

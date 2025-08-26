@@ -4,12 +4,13 @@ import streamlit as st
 from streamlit_calendar import calendar
 
 import db
+from update_event import update_event
 
 
 def my_calendar():
     calendar_options = {
-        "editable": True,
         "selectable": True,
+        "editable": False,
         "headerToolbar": {
             "left": "today prev,next",
             "center": "title",
@@ -19,6 +20,12 @@ def my_calendar():
         "slotMaxTime": "18:00:00",
         "initialView": "timeGridWeek",
         "firstDay": 1,
+        "height": "auto",
+        "eventTimeFormat": {
+            "hour": "2-digit",
+            "minute": "2-digit",
+            "hour12": False
+        }
     }
 
     db.init_db()
@@ -50,7 +57,7 @@ def my_calendar():
             "display": "auto",
             "backgroundColor": TASK_BG,
             "borderColor": TASK_BORDER,
-            "textColor": TASK_TEXT,
+            "textColor": TASK_TEXT
         })
 
     for lecture in lectures_list:
@@ -67,7 +74,7 @@ def my_calendar():
             "display": "auto",
             "backgroundColor": LEC_BG,
             "borderColor": LEC_BORDER,
-            "textColor": LEC_TEXT,
+            "textColor": LEC_TEXT
         })
 
     custom_css = """
@@ -89,7 +96,7 @@ def my_calendar():
         events=calendar_events,
         options=calendar_options,
         custom_css=custom_css,
-        key="calendar", 
+        key="calendar"
     )
 
     if cal_state and "eventClick" in cal_state:
@@ -108,20 +115,29 @@ def my_calendar():
             if props.get("status"):
                 st.write(f"Status: {props.get('status')}")
 
-            if st.button(label="DELETE", type="primary"):
-                if event_id is None:
-                    st.error("Delete failed (missing id)")
-                    return
-                
-                if props.get("type") == "task":
-                    db.delete_task(task_id=event_id)
-                    st.success("Task deleted")
-                    time.sleep(1)
-                    st.rerun()
-                elif props.get("type") == "lecture":
-                    db.delete_lecture(lecture_id=event_id)
-                    st.success("Lecture deleted")
-                    time.sleep(1)
-                    st.rerun()
-                else:
-                    st.error("Delete failed")
+            update_event_toggle = st.toggle(
+                label="Update event?",
+                value=False,
+                key="update_event"
+            )
+            
+            if update_event_toggle:
+                update_event(ev)
+            else:
+                if st.button(label="DELETE", type="primary"):
+                    if event_id is None:
+                        st.error("Delete failed (missing id)")
+                        return
+                    
+                    if props.get("type") == "task":
+                        db.delete_task(task_id=event_id)
+                        st.success("Task deleted")
+                        time.sleep(1)
+                        st.rerun()
+                    elif props.get("type") == "lecture":
+                        db.delete_lecture(lecture_id=event_id)
+                        st.success("Lecture deleted")
+                        time.sleep(1)
+                        st.rerun()
+                    else:
+                        st.error("Delete failed")

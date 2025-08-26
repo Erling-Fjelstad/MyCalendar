@@ -116,6 +116,41 @@ def get_lectures_as_objects() -> list[Lecture]:
             ))
         
         return lectures
+    
+def update_task(
+    task_id: int,
+    title: str,
+    description: str,
+    all_day: bool,
+    start: str,
+    end: str,
+    status: str
+):
+    with get_connection() as conn:
+        cur = conn.cursor()
+        cur.execute("""
+            UPDATE tasks
+            SET title = ?, description = ?, all_day = ?, start = ?, end = ?, status = ?
+            WHERE id = ?
+        """, (title, description, all_day, start, end, status, task_id)
+        )
+
+def update_lecture(
+    lecture_id: int,
+    course: str,
+    description: str,
+    all_day: bool,
+    start: str,
+    end: str
+):
+    with get_connection() as conn:
+        cur = conn.cursor()
+        cur.execute("""
+            UPDATE lectures
+            SET course = ?, description = ?, all_day = ?, start = ?, end = ?
+            WHERE id = ?
+        """, (course, description, all_day, start, end, lecture_id)
+        )
 
 def delete_task(task_id: int):
     with get_connection() as conn:
