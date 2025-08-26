@@ -10,3 +10,6 @@ Run with uv:
 ```bash
 uv run streamlit run app.py
 ```
+
+> [!WARNING]  
+> This project is **under development** (work in progress).
