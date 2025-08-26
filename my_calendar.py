@@ -15,7 +15,7 @@ def my_calendar():
             "center": "title",
             "right": "timeGridDay,timeGridWeek",
         },
-        "slotMinTime": "06:00:00",
+        "slotMinTime": "08:00:00",
         "slotMaxTime": "18:00:00",
         "initialView": "timeGridWeek",
         "firstDay": 1,

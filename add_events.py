@@ -15,6 +15,8 @@ def add_object(
     description: str,
     date: datetime.date,
     all_day: bool,
+    repeat_weekly: bool,
+    repeat_weeks: int = 1,
     start: datetime.time | None = None,
     end: datetime.time | None = None,
     status: str | None = "todo",
@@ -26,6 +28,7 @@ def add_object(
     if all_day:
         start_dt = datetime.datetime.combine(date, datetime.time(0, 0))
         end_dt = datetime.datetime.combine(date, datetime.time(23, 59, 59))
+        
     else:
         if not start or not end:
             st.error("Please select start and end time")
@@ -40,31 +43,67 @@ def add_object(
 
     if event == "Task":
         status_norm = STATUS_MAP.get(status or "", "todo")
-        task = Task(
-            title=title.strip(),
-            description=description.strip(),
-            all_day=all_day,
-            start=start_dt,
-            end=end_dt,
-            status=status_norm,
-        )
-        db.insert_task(task)
-        st.success("Task added")
-        time.sleep(1)
-        st.rerun()
+
+        if repeat_weekly:
+            for i in range(int(repeat_weeks)):
+                delta = datetime.timedelta(weeks=i)
+                task = Task(
+                    title=title.strip(),
+                    description=description.strip(),
+                    all_day=all_day,
+                    start=start_dt + delta,
+                    end=end_dt + delta,
+                    status=status_norm,
+                )
+                db.insert_task(task)
+
+            st.success(f"Task added (weekly x {int(repeat_weeks)})")
+            time.sleep(1)
+            st.rerun()
+
+        else:
+            task = Task(
+                title=title.strip(),
+                description=description.strip(),
+                all_day=all_day,
+                start=start_dt,
+                end=end_dt,
+                status=status_norm,
+            )
+            db.insert_task(task)
+            st.success("Task added")
+            time.sleep(1)
+            st.rerun()
 
     elif event == "Lecture":
-        lecture = Lecture(         
-            course=title.strip(),
-            description=description.strip(),
-            all_day=all_day,
-            start=start_dt,
-            end=end_dt,
-        )
-        db.insert_lecture(lecture)
-        st.success("Lecture added")
-        time.sleep(1)
-        st.rerun()
+        if repeat_weekly:
+            for i in range(int(repeat_weeks)):
+                delta = datetime.timedelta(weeks=i)
+                lecture = Lecture(         
+                    course=title.strip(),
+                    description=description.strip(),
+                    all_day=all_day,
+                    start=start_dt + delta,
+                    end=end_dt + delta,
+                )
+                db.insert_lecture(lecture)
+
+            st.success(f"Lecture added (weekly x {int(repeat_weeks)})")
+            time.sleep(1)
+            st.rerun()
+
+        else:
+            lecture = Lecture(         
+                course=title.strip(),
+                description=description.strip(),
+                all_day=all_day,
+                start=start_dt,
+                end=end_dt,
+            )
+            db.insert_lecture(lecture)
+            st.success("Lecture added")
+            time.sleep(1)
+            st.rerun()
 
     else:
         st.error("Unknown event type")
@@ -108,6 +147,17 @@ def add_events():
             index=None,
             placeholder="Select the status",
         )
+    
+    repeat_weekly = st.toggle("Repeat weekly?", value=False)
+
+    repeat_weeks = 1
+    if repeat_weekly:
+        repeat_weeks = st.number_input(
+            label="Number of weeks:",
+            value=10,
+            min_value=2,
+            step=1,
+        )
 
     if st.button(label="Add", type="primary"):
         add_object(
@@ -119,4 +169,6 @@ def add_events():
             start=None if event_all_day else event_start,
             end=None if event_all_day else event_end,
             status=event_status,
+            repeat_weekly=repeat_weekly,
+            repeat_weeks=repeat_weeks,
         )
