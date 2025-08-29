@@ -5,6 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "mcp[cli]>=1.13.1",
     "streamlit>=1.48.1",
     "streamlit-calendar>=1.4.0",
 ]
