@@ -113,5 +113,18 @@ def update_event(
             time.sleep(1)
             st.rerun()
         
+        elif props.get("type") == "exercise":
+            db.update_exercise(
+                exercise_id=event_id,
+                course=title,
+                description=description,
+                all_day=all_day,
+                start=start_dt,
+                end=end_dt
+            )
+            st.success("Exercise updated")
+            time.sleep(1)
+            st.rerun()
+        
         else:
             st.error("Cannot update event")

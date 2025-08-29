@@ -5,6 +5,7 @@ from mcp.server.fastmcp import FastMCP
 import db
 from task import Task
 from lecture import Lecture
+from exercise import Exercise
 
 mcp = FastMCP("myCalendarMCP")
 
@@ -26,6 +27,15 @@ def get_lectures_tool() -> list[dict]:
         return db.get_lectures()
     except Exception as e:
         print(f"Error getting lectures: {e}")
+        return []
+
+@mcp.tool()
+def get_exercises_tool() -> list[dict]:
+    """Get all exercises from the database."""
+    try:
+        return db.get_exercises()
+    except Exception as e:
+        print(f"Error getting exercises: {e}")
         return []
 
 @mcp.tool()
@@ -109,6 +119,44 @@ def insert_lecture_tool(
     except Exception as e:
         return {"error": str(e)}
 
+@mcp.tool()
+def insert_exercise_tool(
+    course: str,
+    description: str,
+    all_day: bool,
+    start: str,
+    end: str
+) -> dict:
+    """Insert a new exercise into the database.
+
+    Args:
+        course (str): The name of the course.
+        description (str): The description of the lecture.
+        all_day (bool): Whether the exercise is an all-day event.
+        start (str): The start time in ISO format (e.g., "2025-08-26T14:30:00").
+        end (str): The end time in ISO format (e.g., "2025-08-26T16:00:00").
+    """
+
+    try:
+        start_dt = datetime.fromisoformat(start)
+        end_dt = datetime.fromisoformat(end)
+
+        if end_dt <= start_dt:
+            return {"error": "End time must be after start time"}
+
+        exercise = Exercise(
+            course=course,
+            description=description,
+            all_day=all_day,
+            start=start_dt,
+            end=end_dt
+        )      
+
+        db.insert_exercise(exercise)
+
+        return {"message": "Exercise inserted successfully."}
+    except Exception as e:
+        return {"error": str(e)}
 
 @mcp.tool()
 def delete_task_tool(task_id: int) -> dict:
@@ -141,6 +189,23 @@ def delete_lecture_tool(lecture_id: int) -> dict:
     try:
         db.delete_lecture(lecture_id)
         return {"message": "Lecture deleted successfully"}
+    except Exception as e:
+        return {"error": str(e)}
+    
+@mcp.tool()
+def delete_exercise_tool(exercise_id: int) -> dict:
+    """Delete a exercise from the database by its ID.
+
+    Args:
+        exercise_id (int): The ID of the exercise to delete.
+
+    Note:
+        This action is irreversible.
+        Always double-check the exercise ID before deleting, by retrieving the exercise details first.
+    """
+    try:
+        db.delete_exercise(exercise_id)
+        return {"message": "Exercise deleted successfully"}
     except Exception as e:
         return {"error": str(e)}
 

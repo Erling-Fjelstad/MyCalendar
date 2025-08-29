@@ -6,6 +6,7 @@ import streamlit as st
 import db
 from task import Task
 from lecture import Lecture
+from exercise import Exercise
 
 
 def add_object(
@@ -54,7 +55,7 @@ def add_object(
                 )
                 db.insert_task(task)
 
-            st.success(f"Task added (weekly x {int(repeat_weeks)})")
+            st.success(f"Tasks added (weekly x {int(repeat_weeks)})")
             time.sleep(1)
             st.rerun()
 
@@ -85,7 +86,7 @@ def add_object(
                 )
                 db.insert_lecture(lecture)
 
-            st.success(f"Lecture added (weekly x {int(repeat_weeks)})")
+            st.success(f"Lectures added (weekly x {int(repeat_weeks)})")
             time.sleep(1)
             st.rerun()
 
@@ -101,6 +102,36 @@ def add_object(
             st.success("Lecture added")
             time.sleep(1)
             st.rerun()
+        
+    elif event == "Exercise":
+        if repeat_weekly:
+            for i in range(int(repeat_weeks)):
+                delta = datetime.timedelta(weeks=i)
+                exercise = Exercise(
+                    course=title.strip(),
+                    description=description.strip(),
+                    all_day=all_day,
+                    start=start_dt + delta,
+                    end=end_dt + delta
+                )
+                db.insert_exercise(exercise)
+            
+            st.success(f"Exercises added (weekly x {int(repeat_weeks)})")
+            time.sleep(1)
+            st.rerun()
+        
+        else:
+            exercise = Exercise(
+                course=title.strip(),
+                description=description.strip(),
+                all_day=all_day,
+                start=start_dt,
+                end=end_dt
+            )
+            db.insert_exercise(exercise)
+            st.success("Exercise added")
+            time.sleep(1)
+            st.rerun()
 
     else:
         st.error("Unknown event type")
@@ -108,7 +139,7 @@ def add_object(
 def add_events():
     event = st.selectbox(
         label="Event:",
-        options=["Task", "Lecture"],
+        options=["Task", "Lecture", "Exercise"],
         index=None,
         placeholder="Select event type"
     )
