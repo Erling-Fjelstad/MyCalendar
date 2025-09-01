@@ -6,6 +6,8 @@ import db
 from task import Task
 from lecture import Lecture
 from exercise import Exercise
+from project import Project
+
 
 mcp = FastMCP("myCalendarMCP")
 
@@ -17,8 +19,7 @@ def get_tasks_tool() -> list[dict]:
     try:
         return db.get_tasks()
     except Exception as e:
-        print(f"Error getting tasks: {e}")
-        return []
+        return [{"error": str(e)}]
 
 @mcp.tool()
 def get_lectures_tool() -> list[dict]:
@@ -26,8 +27,7 @@ def get_lectures_tool() -> list[dict]:
     try:
         return db.get_lectures()
     except Exception as e:
-        print(f"Error getting lectures: {e}")
-        return []
+        return [{"error": str(e)}]
 
 @mcp.tool()
 def get_exercises_tool() -> list[dict]:
@@ -35,8 +35,15 @@ def get_exercises_tool() -> list[dict]:
     try:
         return db.get_exercises()
     except Exception as e:
-        print(f"Error getting exercises: {e}")
-        return []
+        return [{"error": str(e)}]
+
+@mcp.tool()
+def get_projects_tool() -> list[dict]:
+    """Get all projects from the database."""
+    try:
+        return db.get_projects()
+    except Exception as e:
+        return [{"error": str(e)}]
 
 @mcp.tool()
 def insert_task_tool(
@@ -159,6 +166,45 @@ def insert_exercise_tool(
         return {"error": str(e)}
 
 @mcp.tool()
+def insert_project_tool(
+    course: str,
+    description: str,
+    all_day: bool,
+    start: str,
+    end: str
+) -> dict:
+    """Insert a new project into the database.
+
+    Args:
+        course (str): The name of the course.
+        description (str): The description of the project.
+        all_day (bool): Whether the project is an all-day event.
+        start (str): The start time in ISO format (e.g., "2025-08-26T14:30:00").
+        end (str): The end time in ISO format (e.g., "2025-08-26T16:00:00").
+    """
+
+    try:
+        start_dt = datetime.fromisoformat(start)
+        end_dt = datetime.fromisoformat(end)
+
+        if end_dt <= start_dt:
+            return {"error": "End time must be after start time"}
+
+        project = Project(
+            course=course,
+            description=description,
+            all_day=all_day,
+            start=start_dt,
+            end=end_dt
+        )
+
+        db.insert_project(project)
+
+        return {"message": "Project inserted successfully."}
+    except Exception as e:
+        return {"error": str(e)}
+
+@mcp.tool()
 def delete_task_tool(task_id: int) -> dict:
     """Delete a task from the database by its ID.
 
@@ -206,6 +252,23 @@ def delete_exercise_tool(exercise_id: int) -> dict:
     try:
         db.delete_exercise(exercise_id)
         return {"message": "Exercise deleted successfully"}
+    except Exception as e:
+        return {"error": str(e)}
+
+@mcp.tool()
+def delete_project_tool(project_id: int) -> dict:
+    """Delete a project from the database by its ID.
+
+    Args:
+        project_id (int): The ID of the project to delete.
+
+    Note:
+        This action is irreversible.
+        Always double-check the project ID before deleting, by retrieving the project details first.
+    """
+    try:
+        db.delete_project(project_id)
+        return {"message": "Project deleted successfully"}
     except Exception as e:
         return {"error": str(e)}
 

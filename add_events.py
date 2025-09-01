@@ -7,6 +7,7 @@ import db
 from task import Task
 from lecture import Lecture
 from exercise import Exercise
+from project import Project
 
 
 def add_object(
@@ -133,13 +134,43 @@ def add_object(
             time.sleep(1)
             st.rerun()
 
+    elif event == "Project":
+        if repeat_weekly:
+            for i in range(int(repeat_weeks)):
+                delta = datetime.timedelta(weeks=i)
+                project = Project(
+                    course=title.strip(),
+                    description=description.strip(),
+                    all_day=all_day,
+                    start=start_dt + delta,
+                    end=end_dt + delta
+                )
+                db.insert_project(project)
+
+            st.success(f"Projects added (weekly x {int(repeat_weeks)})")
+            time.sleep(1)
+            st.rerun()
+
+        else:
+            project = Project(
+                course=title.strip(),
+                description=description.strip(),
+                all_day=all_day,
+                start=start_dt,
+                end=end_dt
+            )
+            db.insert_project(project)
+            st.success("Project added")
+            time.sleep(1)
+            st.rerun()
+
     else:
         st.error("Unknown event type")
 
 def add_events():
     event = st.selectbox(
         label="Event:",
-        options=["Task", "Lecture", "Exercise"],
+        options=["Task", "Lecture", "Exercise", "Project"],
         index=None,
         placeholder="Select event type"
     )

@@ -6,6 +6,7 @@ from streamlit_calendar import calendar
 import db
 from update_event import update_event
 
+
 def my_calendar():
     calendar_options = {
         "selectable": True,
@@ -31,6 +32,7 @@ def my_calendar():
     tasks_list = db.get_tasks()
     lectures_list = db.get_lectures()
     exercises_list = db.get_exercises()
+    projects_list = db.get_projects()
 
     calendar_events = []
 
@@ -45,6 +47,10 @@ def my_calendar():
     EXER_BG = "#F58394"      
     EXER_BORDER = "#F65B7A"
     EXER_TEXT = "#07080D"
+
+    PROJ_BG = "#FFD8A9"
+    PROJ_BORDER = "#FFC107"
+    PROJ_TEXT = "#150F0B"
 
     for task in tasks_list:
         calendar_events.append({
@@ -96,6 +102,23 @@ def my_calendar():
             "backgroundColor": EXER_BG,
             "borderColor": EXER_BORDER,
             "textColor": EXER_TEXT
+        })
+
+    for project in projects_list:
+        calendar_events.append({
+            "title": project.get("course"),
+            "allDay": bool(project.get("all_day")),
+            "start": project.get("start"),
+            "end": project.get("end"),
+            "extendedProps": {
+                "id": project.get("id"),
+                "description": project.get("description"),
+                "type": "project"
+            },
+            "display": "auto",
+            "backgroundColor": PROJ_BG,
+            "borderColor": PROJ_BORDER,
+            "textColor": PROJ_TEXT
         })
 
     custom_css = """
@@ -163,6 +186,11 @@ def my_calendar():
                     elif props.get("type") == "exercise":
                         db.delete_exercise(exercise_id=event_id)
                         st.success("Exercise deleted")
+                        time.sleep(1)
+                        st.rerun()
+                    elif props.get("type") == "project":
+                        db.delete_project(project_id=event_id)
+                        st.success("Project deleted")
                         time.sleep(1)
                         st.rerun()
                     else:

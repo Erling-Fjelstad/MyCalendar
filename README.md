@@ -1,12 +1,12 @@
 # My Calendar
 
 A modern calendar application built with **Streamlit**, **SQLite**, and **Python** with AI integration via **Claude Desktop**.  
-Designed for personal use to efficiently manage tasks, lectures, and exercises with features like weekly repeats and visual timeline views.
+Designed for personal use to efficiently manage tasks, lectures, exercises and projects with features like weekly repeats and visual timeline views.
 
 ## Features
 
 - **Interactive Calendar** - Weekly and daily views with visual event timeline
-- **Multiple Event Types** - Tasks, Lectures, and Exercises  
+- **Multiple Event Types** - Tasks, Lectures, Exercises and Projects
 - **Weekly Repeats** - Automatically schedule recurring events
 - **Full CRUD** - Create, read, update, and delete events
 - **AI Integration** - Manage calendar through Claude desktop

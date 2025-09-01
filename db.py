@@ -4,6 +4,8 @@ from datetime import datetime
 from task import Task
 from lecture import Lecture
 from exercise import Exercise
+from project import Project
+
 
 def get_connection() -> sqlite3.Connection:
     conn = sqlite3.connect("mycalendar.db")
@@ -43,6 +45,19 @@ def init_db():
 
         cur.execute("""
             CREATE TABLE IF NOT EXISTS exercises (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                course TEXT NOT NULL,
+                description TEXT NOT NULL,
+                all_day INTEGER NOT NULL, 
+                start TEXT NOT NULL,
+                end TEXT NOT NULL,
+                created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(course, start, end)
+            );
+        """)
+
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS projects (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 course TEXT NOT NULL,
                 description TEXT NOT NULL,
@@ -97,6 +112,20 @@ def insert_exercise(e: Exercise):
             e.end.isoformat() if isinstance(e.end, datetime) else e.end
         ))
 
+def insert_project(p: Project):
+    with get_connection() as conn:
+        cur = conn.cursor()
+        cur.execute("""
+            INSERT OR IGNORE INTO projects (course, description, all_day, start, end)
+            VALUES (?, ?, ?, ?, ?)
+        """, (
+            p.course,
+            p.description,
+            p.all_day,
+            p.start.isoformat() if isinstance(p.start, datetime) else p.start,
+            p.end.isoformat() if isinstance(p.end, datetime) else p.end
+        ))
+
 def get_tasks() -> list[dict]:
     with get_connection() as conn:
         cur = conn.cursor()
@@ -113,6 +142,12 @@ def get_exercises() -> list[dict]:
     with get_connection() as conn:
         cur = conn.cursor()
         rows = cur.execute("SELECT * FROM exercises").fetchall()
+        return [dict(r) for r in rows]
+
+def get_projects() -> list[dict]:
+    with get_connection() as conn:
+        cur = conn.cursor()
+        rows = cur.execute("SELECT * FROM projects").fetchall()
         return [dict(r) for r in rows]
 
 def get_tasks_as_objects() -> list[Task]:
@@ -167,6 +202,23 @@ def get_exercises_as_objects() -> list[Exercise]:
             ))
 
         return exercises
+    
+def get_projects_as_objects() -> list[Project]:
+    with get_connection() as conn:
+        cur = conn.cursor()
+        rows = cur.execute("SELECT * FROM projects").fetchall()
+        projects = []
+
+        for row in rows:
+            projects.append(Project(
+                course=row["course"],
+                description=row["description"],
+                all_day=bool(row["all_day"]),
+                start=datetime.fromisoformat(row["start"]),
+                end=datetime.fromisoformat(row["end"])
+            ))
+
+        return projects
 
 def update_task(
     task_id: int,
@@ -220,6 +272,23 @@ def update_exercise(
         """, (course, description, all_day, start, end, exercise_id)
         )
 
+def update_project(
+    project_id: int,
+    course: str,
+    description: str,
+    all_day: bool,
+    start: str,
+    end: str
+):
+    with get_connection() as conn:
+        cur = conn.cursor()
+        cur.execute("""
+            UPDATE projects
+            SET course = ?, description = ?, all_day = ?, start = ?, end = ?
+            WHERE id = ?
+        """, (course, description, all_day, start, end, project_id)
+        )
+
 def delete_task(task_id: int):
     with get_connection() as conn:
         cur = conn.cursor()
@@ -242,4 +311,12 @@ def delete_exercise(exercise_id: int):
         cur.execute(
             "DELETE FROM exercises WHERE id = ?",
             (exercise_id,)  
+        )
+
+def delete_project(project_id: int):
+    with get_connection() as conn:
+        cur = conn.cursor()
+        cur.execute(
+            "DELETE FROM projects WHERE id = ?",
+            (project_id,)
         )
